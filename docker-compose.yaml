@@ -1,0 +1,29 @@
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME_FILE=/run/secrets/mongo_root_username
+      - MONGO_INITDB_ROOT_PASSWORD_FILE=/run/secrets/mongo_root_password
+    networks:
+      - app-network
+    secrets:
+      - mongo_root_username
+      - mongo_root_password
+
+volumes:
+  mongodb_data:
+
+networks:
+  app-network:
+    driver: bridge
+
+secrets:
+  mongo_root_username:
+    file: ./secrets/mongo_root_username.txt
+  mongo_root_password:
+    file: ./secrets/mongo_root_password.txt
+
