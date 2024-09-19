@@ -1,31 +1,54 @@
-import { GenericAdapter, PageID } from "./generic";
+import { GenericAdapter } from "./generic";
+import { PageID, Page } from "../types"
+import { MongoClient, Db } from "mongodb"
 
 
 export class MongoDBAdapter extends GenericAdapter {
-    constructor(private readonly uri, private readonly username: string, private readonly password: string, private readonly database: string) {
-        super()
-    }
+    client: MongoClient
+    db: Db
 
-    connect(): Promise<void> {
+    constructor(private readonly uri, 
+        private readonly username: string, 
+        private readonly password: string, 
+        private readonly database: string) {
+        super()
         this.client = new MongoClient(this.uri)
     }
-    disconnect(): Promise<void> {
-        throw new Error("Method not implemented.");
+
+    async connect(): Promise<void> {
+        this.client =  await this.client.connect()
+        this.db = this.client.db(this.database)
+        return void
     }
-    getAllPages(): Promise<string[]> {
-        throw new Error("Method not implemented.");
+
+    async disconnect(): Promise<void> {
+        await this.client.close()
+        return void
     }
-    getPage(page: PageID): Promise<Page> {
-        throw new Error("Method not implemented.");
+
+    async getAllPages(): Promise<string[]> {
+        const pages = await this.db.collection("pages").find({}).toArray()
+        return pages
     }
-    createPage(page: PageID): Promise<Page> {
-        throw new Error("Method not implemented.");
+
+    async getPage(id: PageID): Promise<Page> {
+        const queried = await this.db.collection("pages").findOne({ id: id })
+        return queried as Page
     }
-    updatePage(page: PageID): Promise<Page> {
-        throw new Error("Method not implemented.");
+
+    async createPage(page: Page): Promise<Page> {
+        const created = await this.db.collection("pages").insertOne(page)
+        return created as Page
     }
-    deletePage(page: PageID): Promise<void> {
-        throw new Error("Method not implemented.");
+
+    async updatePage(id: PageID, page: Page): Promise<Page> {
+        const updated = await this.db.collection("pages").updateOne({ id: id }, { $set: page })
+        return updated as Page
+    }
+
+    async deletePage(id: PageID): Promise<void> {
+        await this.db.collection("pages").deleteOne({ id: id })
+        return void
     }
 
 }

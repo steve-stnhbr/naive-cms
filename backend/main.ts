@@ -1,6 +1,7 @@
-import { GenericAdapter, PageID } from "./adapters/generic"
+import { GenericAdapter } from "./adapters/generic"
 import { MongoDBAdapter } from "./adapters/mongodb"
 import { Config, fromFile } from "./config"
+import { PageID } from "./types"
 import * as path from "path"
 
 let initialized = false
