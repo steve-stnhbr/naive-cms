@@ -1,13 +1,10 @@
 import { GenericAdapter } from "./adapters/generic"
 import { MongoDBAdapter } from "./adapters/mongodb"
 import { Config, fromFile } from "./config"
-import { PageID } from "./types"
 import * as path from "path"
 
 let initialized = false
-let adapter: GenericAdapter
-
-process.nextTick(init)
+let adapter: GenericAdapter | undefined
 
 export function init(config: Config | string | undefined) {
     if (initialized) {
@@ -32,34 +29,13 @@ export function init(config: Config | string | undefined) {
     initialized = true
 }
 
-function checkInitialized() {
-    if (!initialized) {
-        throw new Error("Not initialized")
-    }
-}
-
-export function getAllPages() {
-    checkInitialized()
-
-    return adapter.getAllPages()
-}
-
-export function getPage(page: PageID) {
-    checkInitialized()
-    return adapter.getPage(page)
-}
-
-export function createPage(page: PageID) {
-    checkInitialized()
-    return adapter.createPage(page)
-}
-
-export function updatePage(page: PageID) {
-    checkInitialized()
-    return adapter.updatePage(page)
-}
-
-export function deletePage(page: PageID) {
-    checkInitialized()
-    return adapter.deletePage(page)
-}
+export const {
+    getAllPages,
+    getPage,
+    createPage,
+    updatePage,
+    deletePage
+} = (() => {
+    init(undefined);
+    return adapter!;
+})();

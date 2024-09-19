@@ -12,23 +12,24 @@ export class MongoDBAdapter extends GenericAdapter {
         private readonly password: string, 
         private readonly database: string) {
         super()
-        this.client = new MongoClient(this.uri)
+        const loginURI = `mongodb+srv://${this.username}:${this.password}@${this.uri}`
+        this.client = new MongoClient(loginURI)
     }
 
-    async connect(): Promise<void> {
+    async connect(): Promise<boolean> {
         this.client =  await this.client.connect()
         this.db = this.client.db(this.database)
-        return void
+        return true
     }
 
-    async disconnect(): Promise<void> {
+    async disconnect(): Promise<boolean> {
         await this.client.close()
-        return void
+        return true
     }
 
-    async getAllPages(): Promise<string[]> {
+    async getAllPages(): Promise<Page[]> {
         const pages = await this.db.collection("pages").find({}).toArray()
-        return pages
+        return pages as Page[]
     }
 
     async getPage(id: PageID): Promise<Page> {
@@ -46,9 +47,9 @@ export class MongoDBAdapter extends GenericAdapter {
         return updated as Page
     }
 
-    async deletePage(id: PageID): Promise<void> {
-        await this.db.collection("pages").deleteOne({ id: id })
-        return void
+    async deletePage(id: PageID): Promise<boolean> {
+        const deleted = await this.db.collection("pages").deleteOne({ id: id })
+        return deleted.acknowledged
     }
 
 }
