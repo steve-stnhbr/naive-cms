@@ -5,46 +5,50 @@ import { useState } from "react"
 import { Button } from "@/lib/components/shadcn/ui/button"
 import { Input } from "@/lib/components/shadcn/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/lib/components/shadcn/ui/table"
-import { Pencil, Save, Trash, X } from "lucide-react"
-import { PageContent } from "../../../backend/src/types"
+import { Pencil, Save, Trash } from "lucide-react"
 
-export default function EdiTable({ content }: { content: PageContent[] }) {
-  const [elements, setElements] = useState<PageContent[]>(content)
-  const [editingId, setEditingId] = useState<string | null>(null)
+interface EdiTableProps {
+    content: Array<{name: string, content: string}>
+    onChange: (newContent: Array<{ name: string, content: string }>) => void
+}
+
+export default function EdiTable({ content, onChange }: EdiTableProps) {
+  const [elements, setElements] = useState<Array<{name: string, content: string}>>(content)
+  const [editingIndex, setEditingIndex] = useState<number | null>(null)
   const [newName, setNewName] = useState("")
   const [newContent, setNewContent] = useState("")
 
-  const handleEdit = (id: string) => {
-    setEditingId(id)
+  const handleEdit = (index: number) => {
+    setEditingIndex(index)
   }
 
-  const handleSave = (id: string) => {
-    setElements(elements.map(el => 
-      el.id === id 
-        ? { ...el, 
-            name: (document.getElementById(`name-${id}`) as HTMLInputElement).value,
-            content: (document.getElementById(`content-${id}`) as HTMLInputElement).value 
+  const handleSave = (index: number) => {
+    setElements(elements.map((el, i) => 
+      i === index 
+        ? { 
+            name: (document.getElementById(`name-${index}`) as HTMLInputElement).value,
+            content: (document.getElementById(`content-${index}`) as HTMLInputElement).value 
           }
         : el
     ))
-    setEditingId(null)
+    setEditingIndex(null)
+    onChange(elements)
   }
 
   const handleCancel = () => {
-    setEditingId(null)
+    setEditingIndex(null)
   }
 
-  const handleDelete = () => {
-    setElements(elements.filter(el => el.id !== editingId))
-    setEditingId(null)
+  const handleDelete = (index: number) => {
+    setElements(elements.filter((_, i) => i !== index))
+    setEditingIndex(null)
+    onChange(elements)
   }
 
   const handleAdd = (e: React.FormEvent) => {
     e.preventDefault()
     if (newName && newContent) {
-      const newElement: PageContent = {
-        id: Date.now().toString(), // Generate a unique ID
-        pageId: elements[0]?.pageId || "", // Assume all elements have the same pageId
+      const newElement = {
         name: newName,
         content: newContent
       }
@@ -52,6 +56,7 @@ export default function EdiTable({ content }: { content: PageContent[] }) {
       setNewName("")
       setNewContent("")
     }
+    onChange(elements)
   }
 
   return (
@@ -65,34 +70,34 @@ export default function EdiTable({ content }: { content: PageContent[] }) {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {elements.map(element => (
-            <TableRow key={element.id}>
+          {elements.map((element, index) => (
+            <TableRow key={index}>
               <TableCell>
-                {editingId === element.id ? (
-                  <Input id={`name-${element.id}`} defaultValue={element.name} />
+                {editingIndex === index ? (
+                  <Input id={`name-${index}`} defaultValue={element.name} />
                 ) : (
                   element.name
                 )}
               </TableCell>
               <TableCell>
-                {editingId === element.id ? (
-                  <Input id={`content-${element.id}`} defaultValue={element.content} />
+                {editingIndex === index ? (
+                  <Input id={`content-${index}`} defaultValue={element.content} />
                 ) : (
                   element.content
                 )}
               </TableCell>
               <TableCell>
-                {editingId === element.id ? (
+                {editingIndex === index ? (
                   <div className="flex space-x-2">
-                    <Button size="sm" onClick={() => handleSave(element.id)}>
+                    <Button size="sm" onClick={() => handleSave(index)}>
                       <Save className="h-4 w-4" />
                     </Button>
-                    <Button size="sm" variant="outline" onClick={handleDelete}>
+                    <Button size="sm" variant="outline" onClick={() => handleDelete(index)}>
                       <Trash className="h-4 w-4" />
                     </Button>
                   </div>
                 ) : (
-                  <Button size="sm" variant="outline" onClick={() => handleEdit(element.id)}>
+                  <Button size="sm" variant="outline" onClick={() => handleEdit(index)}>
                     <Pencil className="h-4 w-4" />
                   </Button>
                 )}

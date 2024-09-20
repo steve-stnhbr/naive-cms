@@ -8,13 +8,14 @@ import PageDialog from "@/lib/components/page-dialog"
 import { Page } from "../../../backend/src/types"
 
 
+export const handleAddPage = async (page: Page) => {
+    "use server"
+    const adapter = await init(undefined)
+    await adapter.createPage(page)
+}
+
 export default async function Pages() {
     const adapter = await init(undefined)
-
-    const handleAddPage = async (page: Page) => {
-        "use server"
-        await adapter.createPage(page)
-    }
 
     return (
         <div>
