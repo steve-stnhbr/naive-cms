@@ -12,6 +12,9 @@ export type Config = {
 } | {
     adapter: "sqlite"
     path: string
+} | {
+    adapter: "prisma"
+    uri: string
 }
 
 export function fromFile(path: string): Config {

@@ -1,0 +1,7 @@
+{
+    "adapter": "mongodb",
+    "uri": "localhost:27017",
+    "username": "naivecms",
+    "password": "naivecms",
+    "database": "naive"
+}

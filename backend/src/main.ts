@@ -1,14 +1,14 @@
 import { GenericAdapter } from "./adapters/generic"
 import { MongoDBAdapter } from "./adapters/mongodb"
+import { PrismaAdapter } from "./adapters/prisma"
 import { Config, fromFile } from "./config"
 import * as path from "path"
 
-let initialized = false
-let adapter: GenericAdapter | undefined
+var adapter: GenericAdapter | undefined
 
-export function init(config: Config | string | undefined) {
-    if (initialized) {
-        throw new Error("Already initialized")
+export async function init(config: Config | string | undefined): Promise<GenericAdapter> {
+    if (adapter) {
+        return adapter
     }
 
     if (typeof config === "string") {
@@ -22,20 +22,13 @@ export function init(config: Config | string | undefined) {
         case "mongodb":
             adapter = new MongoDBAdapter(config.uri, config.username, config.password, config.database)
             break
+        case "prisma":
+            adapter = new PrismaAdapter(config.uri)
+            break
         default:
             throw new Error("Invalid adapter")
     }
 
-    initialized = true
+    await adapter.connect()
+    return adapter
 }
-
-export const {
-    getAllPages,
-    getPage,
-    createPage,
-    updatePage,
-    deletePage
-} = (() => {
-    init(undefined);
-    return adapter!;
-})();

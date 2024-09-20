@@ -1,29 +1,30 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:13
+    environment:
+      POSTGRES_USER: naivecms
+      POSTGRES_PASSWORD: naivecms
+      POSTGRES_DB: naive
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./.postgres_data:/var/lib/postgresql/data
   mongodb:
     image: mongo:latest
-    container_name: mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: naivecms
+      MONGO_INITDB_ROOT_PASSWORD: naivecms
+      MONGO_INITDB_DATABASE: naive
     ports:
       - "27017:27017"
     volumes:
       - mongodb_data:/data/db
-    environment:
-      - MONGO_INITDB_ROOT_USERNAME_FILE=/run/secrets/mongo_root_username
-      - MONGO_INITDB_ROOT_PASSWORD_FILE=/run/secrets/mongo_root_password
-    networks:
-      - app-network
-    secrets:
-      - mongo_root_username
-      - mongo_root_password
 
 volumes:
+  postgres_data:
+    driver: local
   mongodb_data:
-
-networks:
-  app-network:
-    driver: bridge
-
-secrets:
-  mongo_root_username:
-    file: ./secrets/mongo_root_username.txt
-  mongo_root_password:
-    file: ./secrets/mongo_root_password.txt
+    driver: local
 

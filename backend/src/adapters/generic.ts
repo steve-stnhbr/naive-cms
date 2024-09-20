@@ -5,8 +5,8 @@ export abstract class GenericAdapter {
   abstract disconnect(): Promise<boolean>;
 
   abstract getAllPages(): Promise<Page[]>;
-  abstract getPage(id: PageID): Promise<Page>;
-  abstract createPage(page: Page): Promise<Page>;
-  abstract updatePage(id: PageID, page: Page): Promise<Page>;
+  abstract getPage(id: PageID): Promise<Page | null>;
+  abstract createPage(page: Page): Promise<PageID>;
+  abstract updatePage(id: PageID, page: Page): Promise<boolean>;
   abstract deletePage(id: PageID): Promise<boolean>;
 }
