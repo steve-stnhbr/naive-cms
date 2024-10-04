@@ -4,14 +4,15 @@ import { Button } from "./shadcn/ui/button";
 
 export default function PageItem({page}: { page: Page}) {
     return (
-        <div className="grid grid-cols-12">
-            <div className="col-span-8">
-                <h2>{page.title}</h2>
-                <p>{page.content.length} sections</p>
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center">
+            <div className="flex flex-col sm:flex-row sm:items-center">
+                <h2 className="mr-4">{page.title}</h2>
+                <p className="text-sm text-gray-500">{page.content.length} sections</p>
+                {/* <p>{page.id}</p> */}
             </div>
-            <div className="col-span-4">
-                <Link href={`/pages/${page.id}`}>
-                    <Button>Edit</Button>
+            <div className="mt-2 sm:mt-0">
+                <Link href={`/pages/${page.id}/edit`}>
+                    <Button className="float-right">Edit</Button>
                 </Link>
             </div>
         </div>

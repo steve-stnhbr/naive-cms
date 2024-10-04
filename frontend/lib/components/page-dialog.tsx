@@ -10,15 +10,28 @@ import EdiTable from "./editable"
 import { z } from "zod"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
+import { useRouter } from "next/navigation"
 
 
-export default function PageDialog({ children, title, description, confirmText, confirmAction, pageObj }: { children: React.ReactNode, title: string, description: string, confirmText: string, confirmAction: (page: Page) => void, pageObj: Page | undefined }) {
-    const [open, setOpen] = useState(false)
+export default function PageDialog({
+    children,
+    title,
+    description,
+    confirmText,
+    confirmAction,
+    pageObj,
+    initiallyOpen, onOpenChange }: { children: React.ReactNode | undefined, title: string, description: string, confirmText: string, confirmAction: (page: Page) => void, pageObj: Page | undefined, initiallyOpen: boolean, onOpenChange: (open: boolean) => void | undefined }) {
+    const [open, setOpen] = useState(initiallyOpen)
     const [page, setPage] = useState<Page | undefined>(pageObj)
-
+    const router = useRouter()
+    
     const handleSubmit = (data: z.infer<typeof formSchema>) => {
         setOpen(false)
+        if (!confirmAction) {
+            return
+        }
         confirmAction(mapPage(data))
+        openChange(false)
     }
 
     const formSchema = z.object({
@@ -33,19 +46,28 @@ export default function PageDialog({ children, title, description, confirmText, 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
-          title: "",
-          path: "",
-          content: [],
+            title: page?.title || "",
+            path: page?.path || "",
+            content: page?.content || [],
         },
-      })
+    })
 
-      const onContentChange = useCallback((newContent: Array<{ name: string, content: string }>) => {
+    const onContentChange = useCallback((newContent: Array<{ name: string, content: string }>) => {
         form.setValue('content', newContent)
-      }, [form])
-    
+    }, [form])
+
+    const openChange = useCallback((open: boolean) => {
+        if (!onOpenChange) {
+            if (!open) {
+                router.replace("/pages")
+            }
+        } else {
+            onOpenChange!(open)
+        }
+    }, [setOpen])
 
     return (
-        <Dialog open={open} onOpenChange={setOpen}>
+        <Dialog open={open} onOpenChange={openChange}>
             <DialogTrigger asChild>{children}</DialogTrigger>
             <DialogContent className="sm:max-w-[425px]">
                 <DialogHeader>
@@ -58,7 +80,7 @@ export default function PageDialog({ children, title, description, confirmText, 
                         <FormField
                             control={form.control}
                             name="title"
-                            render = {({field}) => (
+                            render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Title</FormLabel>
                                     <Input {...field} placeholder={page?.title || "Title"}></Input>
@@ -72,7 +94,7 @@ export default function PageDialog({ children, title, description, confirmText, 
                         <FormField
                             control={form.control}
                             name="path"
-                            render = {({field}) => (
+                            render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Path</FormLabel>
                                     <Input {...field} placeholder={page?.path || "Path"}></Input>
@@ -86,10 +108,13 @@ export default function PageDialog({ children, title, description, confirmText, 
                         <FormField
                             control={form.control}
                             name="content"
-                            render = {({field}) => (
+                            render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Content</FormLabel>
-                                    <EdiTable content={field.value || page?.content || []} onChange={onContentChange}></EdiTable>
+                                    <EdiTable content={field.value || page?.content || []} onChange={(newContent) => {
+                                            field.onChange(newContent);
+                                            onContentChange(newContent);
+                                        }}></EdiTable>
                                 </FormItem>
                             )}
                         />

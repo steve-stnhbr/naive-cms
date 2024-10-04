@@ -17,7 +17,7 @@ export type PageContentID = string
 
 export function mapPage(obj: any): Page {
     return {
-      id: obj.id,
+      id: obj.id || obj._id,
       path: obj.path,
       content: obj.content.map((content: any) => ({
         id: content.id,

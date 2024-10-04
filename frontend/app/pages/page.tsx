@@ -4,8 +4,9 @@ import { init } from "@/../backend/src/main" // TODO: change to package import
 import PageTitle from "@/lib/components/page-title"
 import PageItem from "@/lib/components/page-item"
 import { Button } from "@/lib/components/shadcn/ui/button"
-import PageDialog from "@/lib/components/page-dialog"
 import { Page } from "../../../backend/src/types"
+import { Separator } from "@/lib/components/shadcn/ui/separator"
+import Link from "next/link"
 
 
 export const handleAddPage = async (page: Page) => {
@@ -21,18 +22,16 @@ export default async function Pages() {
         <div>
             <div className="flex justify-between items-center">
                 <PageTitle>Pages</PageTitle>
-                <PageDialog 
-                        title="Add Page" 
-                        description="Add a new page to the website" 
-                        confirmText="Add" 
-                        confirmAction={handleAddPage}
-                        pageObj={undefined}>
+                <Link href="/pages/create">
                     <Button>Add</Button>
-                </PageDialog>
+                </Link>
             </div>
-            <div className="pages-list">
-                {(await adapter.getAllPages()).map((page) => (
-                    <PageItem page={page} />
+            <div className="pages-list w-100 mt-8">
+                {(await adapter.getAllPages()).map((page, index) => (
+                    <>
+                        {index > 0 && <Separator className="mb-2 mt-2" />}
+                        <PageItem page={page} />
+                    </>
                 ))}
             </div>
         </div>

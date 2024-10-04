@@ -1,7 +1,7 @@
 
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/lib/components/shadcn/ui/button"
 import { Input } from "@/lib/components/shadcn/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/lib/components/shadcn/ui/table"
@@ -18,21 +18,27 @@ export default function EdiTable({ content, onChange }: EdiTableProps) {
   const [newName, setNewName] = useState("")
   const [newContent, setNewContent] = useState("")
 
+  useEffect(() => {
+    onChange(elements)
+  }, [elements, onChange])
+
   const handleEdit = (index: number) => {
     setEditingIndex(index)
   }
 
   const handleSave = (index: number) => {
-    setElements(elements.map((el, i) => 
-      i === index 
-        ? { 
-            name: (document.getElementById(`name-${index}`) as HTMLInputElement).value,
-            content: (document.getElementById(`content-${index}`) as HTMLInputElement).value 
-          }
-        : el
-    ))
+    setElements(prevElements => {
+      const updatedElements = prevElements.map((el, i) => 
+        i === index 
+          ? { 
+              name: (document.getElementById(`name-${index}`) as HTMLInputElement).value,
+              content: (document.getElementById(`content-${index}`) as HTMLInputElement).value 
+            }
+          : el
+      )
+      return updatedElements
+    })
     setEditingIndex(null)
-    onChange(elements)
   }
 
   const handleCancel = () => {
@@ -40,9 +46,8 @@ export default function EdiTable({ content, onChange }: EdiTableProps) {
   }
 
   const handleDelete = (index: number) => {
-    setElements(elements.filter((_, i) => i !== index))
+    setElements(prevElements => prevElements.filter((_, i) => i !== index))
     setEditingIndex(null)
-    onChange(elements)
   }
 
   const handleAdd = (e: React.FormEvent) => {
@@ -52,11 +57,10 @@ export default function EdiTable({ content, onChange }: EdiTableProps) {
         name: newName,
         content: newContent
       }
-      setElements([...elements, newElement])
+      setElements(prevElements => [...prevElements, newElement])
       setNewName("")
       setNewContent("")
     }
-    onChange(elements)
   }
 
   return (
